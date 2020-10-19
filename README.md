@@ -1,21 +1,32 @@
 # fish_shop
 
-Описание проекта
+Чат-бот-магазин для Telegram.
+
+Реализованные функции: 
+
+- Интеграция по API с CMS [Elastic Path](https://www.elasticpath.com/) (ранее Moltin)
+- Отслеживание действий пользователя с помощью конечного автомата (Finite-State Machine)
+- Inline кнопки
+- Отправка изображений в чат
+
+![](tg-fish-shop.gif)
+
 
 
 ## Подготовка
 
-- **elasticpath**
+- **Elastic Path**
     
-    Зарегистрируйтесь на [elasticpath](https://www.elasticpath.com/).
+    Зарегистрируйтесь на [Elastic Path](https://www.elasticpath.com/).
 
     Получите [ключи для доступа к API](https://dashboard.elasticpath.com/app).
 
     ![](elasticpath_keys.png)
 
+
     Создайте товары [в каталоге товаров](https://dashboard.elasticpath.com/app/catalogue/products)
 
-    ![](elasticpath_keys.png)
+    ![](elasticpath_catalogue.png)
 
 
 - **Telegram**
@@ -46,19 +57,17 @@
 git clone https://github.com/ArkJzzz/fish_shop.git
 ```
 
-- Создайте файл ```.env``` и поместите в него токены Telegram и elasticpath, а так же данные для доступа к Redis:
+- Создайте файл ```.env``` и поместите в него токены Telegram и Elastic Path, а так же данные для доступа к Redis:
 ```
 TELEGRAM_TOKEN=<Ваш токен>
-ELASTICPATH_STORE_ID=<Store ID>
 ELASTICPATH_CLIENT_ID=<Client ID>
-ELASTICPATH_CLIENT_TOKEN=<Client secret>
 REDIS_HOST=<Адрес БД>
 REDIS_PORT=<Порт>
 REDIS_DB=<Номер БД, по умолчанию 0>
 REDIS_PASSWORD=<Пароль>
 ```
 
-- Установить зависимости:
+- Установите зависимости:
 ```
 pip3 install -r requirements.txt
 ```
@@ -68,8 +77,7 @@ pip3 install -r requirements.txt
 ```
 python3 tg-bot.py
 ```
-![](tg-fish-shop.gif)
 
 
 ------
-Примеры работающего магазина: [@ArkJzzz_fish_shop_bot](tg://resolve?domain=ArkJzzz_fish_shop_bot)
+Пример работающего бота-магазина: [@ArkJzzz_fish_shop_bot](tg://resolve?domain=ArkJzzz_fish_shop_bot)
