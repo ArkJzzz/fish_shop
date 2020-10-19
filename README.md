@@ -80,4 +80,4 @@ python3 tg-bot.py
 
 
 ------
-Пример работающего бота-магазина: [@ArkJzzz_fish_shop_bot](tg://resolve?domain=ArkJzzz_fish_shop_bot)
+Пример работающего бота-магазина: [@ArkJzzz_fish_shop_bot](https://telegram.me/ArkJzzz_fish_shop_bot)
