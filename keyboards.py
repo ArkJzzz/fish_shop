@@ -162,7 +162,7 @@ def format_cart(cart_items):
             value=item_display_price['value']['formatted'],
             )
 
-    formated_cart = '{items}\n\nСумма заказа: {cart_price}'.format(
+    formated_cart = '{items}\nСумма заказа: {cart_price}'.format(
                 items=cart_items_for_print,
                 cart_price=cart_price,
             )

@@ -306,16 +306,19 @@ def checkout(update, context):
                 customer_name, 
                 customer_email
             )
-        logger.debug(customer)
 
-        logger.info('Совершена покупка:\n'\
-            '{customer}\n'\
-            '{cart_items}\n'
+        buy_message = 'Совершена покупка:\n'\
+            '{customer}\n\n'\
+            '{cart_items}\n'\
             .format(
-                customer=customer,
-                cart_items=cart_items,
+                customer=customer['data'],
+                cart_items=keyboards.format_cart(cart_items),
             )
-        )
+        logger.info(buy_message)
+        context.bot.send_message(
+            chat_id=os.getenv('ADMIN_CHAT_ID'),
+            text=buy_message
+            )
 
         create_customer_message = 'Спасибо за покупку!\n'\
                 'Мы с Вами свяжемся в ближайшее время '\

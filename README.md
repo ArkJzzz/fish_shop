@@ -60,6 +60,7 @@ git clone https://github.com/ArkJzzz/fish_shop.git
 - Создайте файл ```.env``` и поместите в него токены Telegram и Elastic Path, а так же данные для доступа к Redis:
 ```
 TELEGRAM_TOKEN=<Ваш токен>
+ADMIN_CHAT_ID=<ID чата администратора магазина> (можно узнать, написав сообщение боту @userinfobot)
 ELASTICPATH_CLIENT_ID=<Client ID>
 REDIS_HOST=<Адрес БД>
 REDIS_PORT=<Порт>
