@@ -235,6 +235,10 @@ def show_description(update, context):
                 product_id,
                 quantity,
             )
+        context.bot.answer_callback_query(
+                callback_query_id=query.id, 
+                text='Товар добавлен в корзину', 
+            )
         logger.debug(
             'Результат добавления товара в корзину: {}'.format(
                 adding_result
