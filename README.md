@@ -2,15 +2,15 @@
 
 Чат-бот-магазин для Telegram.
 
-Реализованные функции: 
+![](tg-fish-shop.gif)
+
+
+## Что используется 
 
 - Интеграция по API с CMS [Elastic Path](https://www.elasticpath.com/) (ранее Moltin)
 - Отслеживание действий пользователя с помощью конечного автомата (Finite-State Machine)
 - Inline кнопки
 - Отправка изображений в чат
-
-![](tg-fish-shop.gif)
-
 
 
 ## Подготовка
@@ -59,7 +59,7 @@ git clone https://github.com/ArkJzzz/fish_shop.git
 
 - Создайте файл ```.env``` и поместите в него токены Telegram и Elastic Path, а так же данные для доступа к Redis:
 ```
-TELEGRAM_TOKEN=<Ваш токен>
+PROD_TELEGRAM_TOKEN=<Ваш токен>
 ADMIN_CHAT_ID=<ID чата администратора магазина> (можно узнать, написав сообщение боту @userinfobot)
 ELASTICPATH_CLIENT_ID=<Client ID>
 REDIS_HOST=<Адрес БД>
@@ -79,6 +79,10 @@ pip3 install -r requirements.txt
 python3 tg-bot.py
 ```
 
+**Как запускать на сервере:**
+
+- шпаргалка по деплою на [Heroku](https://github.com/ArkJzzz/heroku_deploy)
+- шпаргалка по деплою на [удаленном сервере с Ubuntu](https://github.com/ArkJzzz/remote_server_deploy.git)
 
 ------
 Пример работающего бота-магазина: [@ArkJzzz_fish_shop_bot](https://telegram.me/ArkJzzz_fish_shop_bot)

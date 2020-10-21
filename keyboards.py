@@ -38,9 +38,9 @@ def get_menu_keyboard(products):
     menu_keyboard.append(
         [
             InlineKeyboardButton(
-                text='Показать корзину', 
+                text='🛒 корзина', 
                 callback_data=json.dumps(['HANDLE_CART']),
-            )
+            ),
         ],
     )
 

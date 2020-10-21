@@ -45,8 +45,16 @@ def main():
     keyboards_logger.setLevel(logging.DEBUG)
 
     load_dotenv()
-    token = os.getenv('TELEGRAM_TOKEN')
-    updater = Updater(token, use_context=True)
+    try:
+        updater = Updater(
+                token=os.getenv('DEV_TELEGRAM_TOKEN'),
+                use_context=True,
+            )
+    except ValueError:
+        updater = Updater(
+                token=os.getenv('PROD_TELEGRAM_TOKEN'), 
+                use_context=True,
+            )       
 
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', handle_users_reply))
