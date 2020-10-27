@@ -24,6 +24,7 @@ logger = logging.getLogger(__file__)
 _database = None
 
 
+
 def get_database_connection():
     global _database
     if _database is None:
@@ -89,29 +90,17 @@ def handle_users_reply(update, context):
         logger.debug('next_state: {}\n'.format(next_state))
         db.hset(name='fish_shop_users_states', key=chat_id, value=next_state)
 
-    except requests.exceptions.HTTPError as err:
-        status_code = err.response.status_code
-        logger.error('Error. Status code {}'.format(status_code))
-        if status_code == 403:
-            cms_helpers.get_moltin_api_token()
-        elif status_code == 409:
-            logger.warning('Такой e-mail уже есть в базе')
-            exeption_409(update, context)
+    # except requests.exceptions.HTTPError as err:
+    #     status_code = err.response.status_code
+    #     logger.error('Error. Status code {}'.format(status_code))
+    #     if status_code == 403:
+    #         cms_helpers.get_moltin_api_token()
 
     except Exception as err:
         logger.error('Error: {}'.format(err), exc_info=True)
 
 def error(update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
-
-
-def exeption_409(update, context):
-    query = update.callback_query
-    query.message.reply_text(
-            text='Такой e-mail уже есть в базе, попробуйте заново',
-        )
-
-    return 'WAITING_EMAIL'
 
 
 def start(update, context):
@@ -256,15 +245,26 @@ def checkout(update, context):
     elif 'HANDLE_CREATE_CUSTOMER' in query.data:
         user_reply, customer_email = query.data.split('|')
         cart_items = cms_helpers.get_cart_items(moltin_api_token, chat_id)
-        customer = cms_helpers.create_customer(
-                moltin_api_token, 
-                customer_name, 
-                customer_email
-            )
 
-        buy_message =   f'Совершена покупка:\n'\
-                        f'{customer["data"]}\n\n'\
-                        f'{keyboards.format_cart(cart_items)}\n'
+        try:
+            customer = cms_helpers.create_customer(
+                    moltin_api_token,
+                    customer_name,
+                    customer_email
+                )
+        except requests.exceptions.HTTPError as HTTPError:
+            status_code = HTTPError.response.status_code
+            if status_code == 409:
+                logger.warning('Такой e-mail уже есть в базе')
+                query.message.reply_text(
+                    text='Такой e-mail уже есть в базе, попробуйте заново',
+                )
+
+            return 'WAITING_EMAIL'
+
+        buy_message = 'Совершена покупка:\n'\
+                    f'{customer["data"]}\n\n'\
+                    f'{keyboards.format_cart(cart_items)}\n'
         logger.info(buy_message)
         context.bot.send_message(
             chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
