@@ -24,41 +24,6 @@ logger = logging.getLogger(__file__)
 _database = None
 
 
-def main():
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-            fmt='%(asctime)s %(name)s:%(lineno)d - %(message)s',
-            datefmt='%Y-%b-%d %H:%M:%S (%Z)',
-            style='%',
-        )
-    console_handler.setFormatter(formatter)
-
-    logger.addHandler(console_handler)
-    logger.setLevel(logging.DEBUG)
-
-    cms_helpers_logger = logging.getLogger('cms_helpers')
-    cms_helpers_logger.addHandler(console_handler)
-    cms_helpers_logger.setLevel(logging.DEBUG)
-
-    keyboards_logger = logging.getLogger('keyboards')
-    keyboards_logger.addHandler(console_handler)
-    keyboards_logger.setLevel(logging.DEBUG)
-
-    load_dotenv()
-    updater = Updater(
-            token=os.getenv('TELEGRAM_TOKEN'),
-            use_context=True,
-        )
-    dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler('start', handle_users_reply))
-    dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))
-    dispatcher.add_handler(MessageHandler(Filters.text, confirm_email))
-
-    updater.start_polling()
-    updater.idle()
-
-
 def get_database_connection():
     global _database
     if _database is None:
@@ -222,7 +187,6 @@ def show_description(update, context):
         )
 
     elif 'ADD_TO_CART' in query.data:
-        logger.debug(query.data)
         user_reply, product_id, quantity = query.data.split('|')
         adding_result = cms_helpers.add_product_to_cart(
                 moltin_api_token,
@@ -343,6 +307,41 @@ def confirm_email(update, context):
         )
 
     return 'WAITING_EMAIL'
+
+
+def main():
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+            fmt='%(asctime)s %(name)s:%(lineno)d - %(message)s',
+            datefmt='%Y-%b-%d %H:%M:%S (%Z)',
+            style='%',
+        )
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(console_handler)
+    logger.setLevel(logging.DEBUG)
+
+    cms_helpers_logger = logging.getLogger('cms_helpers')
+    cms_helpers_logger.addHandler(console_handler)
+    cms_helpers_logger.setLevel(logging.DEBUG)
+
+    keyboards_logger = logging.getLogger('keyboards')
+    keyboards_logger.addHandler(console_handler)
+    keyboards_logger.setLevel(logging.DEBUG)
+
+    load_dotenv()
+    updater = Updater(
+            token=os.getenv('TELEGRAM_TOKEN'),
+            use_context=True,
+        )
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler('start', handle_users_reply))
+    dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))
+    dispatcher.add_handler(MessageHandler(Filters.text, confirm_email))
+
+    updater.start_polling()
+    updater.idle()
 
 
 if __name__ == '__main__':

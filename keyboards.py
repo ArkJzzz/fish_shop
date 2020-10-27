@@ -156,3 +156,6 @@ def format_cart(cart_items):
 
     return formated_cart
 
+
+if __name__ == '__main__':
+    logger.error('Этот скрипт не предназначен для запуска напрямую')
