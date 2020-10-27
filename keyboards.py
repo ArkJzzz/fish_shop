@@ -13,7 +13,7 @@ start_keyboard = [
     [
         InlineKeyboardButton(
             text='Меню магазина', 
-            callback_data=json.dumps(['HANDLE_MENU']),
+            callback_data='HANDLE_MENU',
         )
     ],
 ]
@@ -24,13 +24,11 @@ def get_menu_keyboard(products):
     for product in products:
         product_name = product['name']
         product_id = product['id']
-        callback_data = json.dumps(['HANDLE_DESCRIPTION', product_id,])
-
         menu_keyboard.append(
             [
                 InlineKeyboardButton(
                     text=product_name, 
-                    callback_data=callback_data,
+                    callback_data=f'HANDLE_DESCRIPTION|{product_id}',
                 )
             ],
         )
@@ -39,7 +37,7 @@ def get_menu_keyboard(products):
         [
             InlineKeyboardButton(
                 text='🛒 корзина', 
-                callback_data=json.dumps(['HANDLE_CART']),
+                callback_data='HANDLE_CART'
             ),
         ],
     )
@@ -54,10 +52,8 @@ def get_product_details_keyboard(product_id):
     for quantity in quantities:
         product_details_keyboard.append(
             InlineKeyboardButton(
-                text='+{} кг'.format(quantity), 
-                callback_data=json.dumps(
-                        ['ADD_TO_CART', product_id, quantity]
-                    ),
+                text=f'+{quantity} кг', 
+                callback_data=f'ADD_TO_CART|{product_id}|{quantity}'
             ),
         )
     product_details_keyboard = [product_details_keyboard]
@@ -65,7 +61,7 @@ def get_product_details_keyboard(product_id):
         [
             InlineKeyboardButton(
                 text='В меню', 
-                callback_data=json.dumps(['HANDLE_MENU']),
+                callback_data='HANDLE_MENU',
             )
         ],
     )
@@ -79,12 +75,11 @@ def get_cart_show_keyboard(cart_items):
         item_name = item['name']
         item_id = item['id']
         product_id = item['product_id']
-        callback_data = json.dumps(['HANDLE_REMOVE_ITEM', item_id])
         cart_show_keyboard.append(
             [
                 InlineKeyboardButton(
-                    text='Удалить из корзины {}'.format(item_name),
-                    callback_data=callback_data,
+                    text=f'Удалить из корзины {item_name}',
+                    callback_data=f'HANDLE_REMOVE_ITEM|{item_id}',
                 )
             ],
         )
@@ -92,11 +87,11 @@ def get_cart_show_keyboard(cart_items):
         [
             InlineKeyboardButton(
                 text='Продолжить покупки', 
-                callback_data=json.dumps(['HANDLE_MENU']),
+                callback_data='HANDLE_MENU',
             ),
             InlineKeyboardButton(
                 text='Оформить заказ', 
-                callback_data=json.dumps(['HANDLE_CHECKOUT']),
+                callback_data='HANDLE_CHECKOUT',
             ),
         ],
     )
@@ -109,13 +104,13 @@ def get_confirmation_keyboard(email):
         [
             InlineKeyboardButton(
                 text='Все верно', 
-                callback_data=json.dumps(['HANDLE_CREATE_CUSTOMER', email]),
+                callback_data=f'HANDLE_CREATE_CUSTOMER|{email}',
             )
         ],
         [
             InlineKeyboardButton(
                 text='Ввести заново', 
-                callback_data=json.dumps(['HANDLE_CHECKOUT']),
+                callback_data='HANDLE_CHECKOUT',
             ),
         ]
     ]
@@ -126,21 +121,14 @@ def get_confirmation_keyboard(email):
 def format_product_info(product_data):
     product_data = product_data['data']
     product_meta = product_data['meta']
-
     product_name = product_data['name']
     description = product_data['description']
     display_price = product_meta['display_price']['with_tax']['formatted']
     availability = product_meta['stock']['level']
 
-    formated_info = '{product_name}\n\n'\
-        '{display_price} за килограмм\n'\
-        '{description}'\
-        .format(
-            product_name=product_name,
-            display_price=display_price,
-            availability=availability,
-            description=description,
-        )
+    formated_info = f'{product_name}\n\n'\
+                    f'{display_price} за килограмм\n'\
+                    f'{description}'
 
     return formated_info
 
@@ -148,24 +136,23 @@ def format_product_info(product_data):
 def format_cart(cart_items):
     cart_price = cart_items['meta']['display_price']['with_tax']['formatted']
     cart_items_for_print = ''
+    
     for item in cart_items['data']:
+        name = item['name']
+        description = item["description"]
+        quantity = item["quantity"]
         item_display_price = item['meta']['display_price']['with_tax']
-        cart_items_for_print += '{name}\n'\
-        '{description}\n'\
-        '{item_price} за килограмм\n'\
-        'в корзине {quantity}кг на сумму {value}\n\n'\
-        .format(
-            name=item['name'],
-            description=item['description'],
-            quantity=item['quantity'],
-            item_price=item_display_price['unit']['formatted'],
-            value=item_display_price['value']['formatted'],
-            )
+        price = item_display_price["unit"]["formatted"]
+        value = item_display_price["value"]["formatted"]
 
-    formated_cart = '{items}\nСумма заказа: {cart_price}'.format(
-                items=cart_items_for_print,
-                cart_price=cart_price,
-            )
+        cart_items_for_print += f'{name}\n'\
+                                f'{description}\n'\
+                                f'{price} за килограмм\n'\
+                                f'в корзине {quantity}кг '\
+                                f'на сумму {value}\n\n'
+
+    formated_cart = f'{cart_items_for_print}\n'\
+                    f'Сумма заказа: {cart_price}'
 
     return formated_cart
 

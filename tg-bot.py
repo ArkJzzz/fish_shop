@@ -80,27 +80,26 @@ def handle_users_reply(update, context):
         user_reply = update.message.text
         chat_id = update.message.chat_id
     elif update.callback_query:
-        callback_data = json.loads(update.callback_query.data)
-        user_reply = callback_data[0]
+        user_reply = update.callback_query.data
         chat_id = update.callback_query.message.chat_id
     else:
         return
 
     if user_reply == '/start':
         user_state = 'START'
-    elif user_reply =='HANDLE_MENU':
+    elif 'HANDLE_MENU' in user_reply:
         user_state = 'HANDLE_MENU'
-    elif user_reply == 'HANDLE_DESCRIPTION':
+    elif 'HANDLE_DESCRIPTION' in user_reply:
         user_state = 'HANDLE_DESCRIPTION'
-    elif user_reply == 'CLEAR_CART':
+    elif 'CLEAR_CART' in user_reply:
         user_state = 'CLEAR_CART'
-    elif user_reply == 'HANDLE_CART':
+    elif 'HANDLE_CART' in user_reply:
         user_state = 'HANDLE_CART'
-    elif user_reply == 'HANDLE_REMOVE_ITEM':
+    elif 'HANDLE_REMOVE_ITEM' in user_reply:
         user_state = 'HANDLE_CART'
-    elif user_reply == 'HANDLE_CHECKOUT':
+    elif 'HANDLE_CHECKOUT' in user_reply:
         user_state = 'WAITING_EMAIL'
-    elif user_reply == 'HANDLE_CREATE_CUSTOMER':
+    elif 'HANDLE_CREATE_CUSTOMER' in user_reply:
         user_state = 'WAITING_EMAIL'
     else:
         user_state = db.hget(
@@ -153,16 +152,15 @@ def exeption_409(update, context):
 def start(update, context):
     chat_id = update.message.chat_id
     user = update.message.from_user
-    logger.info('User @{} started the conversation.'.format(user.username))
+    logger.info(f'User @{user.username} started the conversation.')
     moltin_api_token = cms_helpers.get_moltin_api_token()
-    logger.debug('Moltin API token: {}'.format(moltin_api_token))
+    logger.debug(f'Moltin API token: {moltin_api_token}')
     cart = cms_helpers.get_cart(moltin_api_token, chat_id)
-    logger.debug('Корзина: {}'.format(cart))
+    logger.debug(f'Корзина: {cart}')
 
-    welcome_message = 'Здравствуйте, {}\n'\
-            'Рады видеть Вас в нашем магазине!\n'\
-            'Загляните в наше меню:'\
-        .format(user.first_name)
+    welcome_message = f'Здравствуйте, {user.first_name}\n'\
+                    f'Рады видеть Вас в нашем магазине!\n'\
+                    f'Загляните в наше меню:'
     reply_keyboard = InlineKeyboardMarkup(keyboards.start_keyboard)
 
     update.message.reply_text(
@@ -174,13 +172,11 @@ def start(update, context):
 
 
 def show_menu(update, context):
-    query = update.callback_query
-    callback_data = json.loads(query.data)
-    user_reply = callback_data[0]
     moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
     products = cms_helpers.get_products(moltin_api_token)
+    query = update.callback_query
 
-    if user_reply == 'HANDLE_MENU':
+    if 'HANDLE_MENU' in query.data:
         reply_keyboard = keyboards.get_menu_keyboard(products['data'])
         reply_keyboard = InlineKeyboardMarkup(reply_keyboard)
         context.bot.delete_message(
@@ -201,11 +197,9 @@ def show_description(update, context):
     moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
     query = update.callback_query
     chat_id = query.message.chat_id
-    callback_data = json.loads(query.data)
-    user_reply = callback_data[0]
 
-    if user_reply == 'HANDLE_DESCRIPTION':
-        product_id = callback_data[1]
+    if 'HANDLE_DESCRIPTION' in query.data:
+        user_reply, product_id = query.data.split('|')
         product_data = cms_helpers.get_product(moltin_api_token, product_id)
         image_id = (product_data['data']['relationships']
                                                 ['main_image']['data']['id'])
@@ -227,9 +221,9 @@ def show_description(update, context):
             reply_markup=reply_keyboard,
         )
 
-    elif user_reply == 'ADD_TO_CART':
-        product_id = callback_data[1]
-        quantity = callback_data[2]
+    elif 'ADD_TO_CART' in query.data:
+        logger.debug(query.data)
+        user_reply, product_id, quantity = query.data.split('|')
         adding_result = cms_helpers.add_product_to_cart(
                 moltin_api_token,
                 chat_id,
@@ -240,11 +234,7 @@ def show_description(update, context):
                 callback_query_id=query.id, 
                 text='Товар добавлен в корзину', 
             )
-        logger.debug(
-            'Результат добавления товара в корзину: {}'.format(
-                adding_result
-            )
-        )
+        logger.debug(f'Результат добавления товара в корзину: {adding_result}')
 
     else: 
         logger.debug(query.data)
@@ -256,19 +246,17 @@ def show_cart(update, context):
     moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
     query = update.callback_query
     chat_id = query.message.chat_id
-    callback_data = json.loads(query.data)
-    user_reply = callback_data[0]
 
-    if user_reply == 'HANDLE_REMOVE_ITEM':
-        item_id = callback_data[1]
-        logger.debug('Удаление товара с id {}'.format(item_id))
+    if 'HANDLE_REMOVE_ITEM' in query.data:
+        user_reply, item_id = query.data.split('|')
+        logger.debug(f'Удаление товара с id {item_id}')
         cms_helpers.remove_cart_item(moltin_api_token, chat_id, item_id)
 
     cart_items = cms_helpers.get_cart_items(moltin_api_token, chat_id)
     formated_cart_items = keyboards.format_cart(cart_items)
     cart_show_keyboard = keyboards.get_cart_show_keyboard(cart_items)
     cart_show_keyboard = InlineKeyboardMarkup(cart_show_keyboard)
-    logger.debug('Товары в корзине: {}'.format(cart_items))
+    logger.debug(f'Товары в корзине: {cart_items}')
 
     context.bot.delete_message(
         chat_id=chat_id,
@@ -287,15 +275,13 @@ def checkout(update, context):
     query = update.callback_query
     chat_id = query.message.chat_id
     customer_name = query.from_user.first_name
-    callback_data = json.loads(query.data)
-    user_reply = callback_data[0]
 
     context.bot.delete_message(
         chat_id=query.message.chat_id,
         message_id=query.message.message_id,
     )
 
-    if user_reply == 'HANDLE_CHECKOUT':
+    if 'HANDLE_CHECKOUT' in query.data:
         waiting_email_message = 'Напишите, пожалуйста, Ваш e-mail адрес'
         query.message.reply_text(
             text=waiting_email_message,
@@ -303,8 +289,8 @@ def checkout(update, context):
 
         return 'WAITING_EMAIL'
 
-    elif user_reply == 'HANDLE_CREATE_CUSTOMER':
-        customer_email = callback_data[1]
+    elif 'HANDLE_CREATE_CUSTOMER' in query.data:
+        user_reply, customer_email = query.data.split('|')
         cart_items = cms_helpers.get_cart_items(moltin_api_token, chat_id)
         customer = cms_helpers.create_customer(
                 moltin_api_token, 
@@ -312,18 +298,14 @@ def checkout(update, context):
                 customer_email
             )
 
-        buy_message = 'Совершена покупка:\n'\
-            '{customer}\n\n'\
-            '{cart_items}\n'\
-            .format(
-                customer=customer['data'],
-                cart_items=keyboards.format_cart(cart_items),
-            )
+        buy_message =   f'Совершена покупка:\n'\
+                        f'{customer["data"]}\n\n'\
+                        f'{keyboards.format_cart(cart_items)}\n'
         logger.info(buy_message)
         context.bot.send_message(
             chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
-            text=buy_message
-            )
+            text=buy_message,
+        )
 
         create_customer_message = 'Спасибо за покупку!\n'\
                 'Мы с Вами свяжемся в ближайшее время '\
@@ -344,13 +326,13 @@ def checkout(update, context):
 
 def confirm_email(update, context):
     user_reply = update.message.text
-    logger.debug('user_reply: {}'.format(user_reply))
+    logger.debug(f'user_reply: {user_reply}')
 
     if validate_email(user_reply):
         confirmation_keyboard = keyboards.get_confirmation_keyboard(user_reply)
         reply_keyboard = InlineKeyboardMarkup(confirmation_keyboard)
         update.message.reply_text(
-            text='ваш e-mail: {}'.format(user_reply), 
+            text=f'ваш e-mail: {user_reply}', 
             reply_markup=reply_keyboard,
         )
     else:

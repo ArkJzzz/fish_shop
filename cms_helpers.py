@@ -32,14 +32,6 @@ def get_moltin_api_token():
             moltin_autorization_data['token_type'],
             moltin_autorization_data['access_token'],
         )
-    expires = int(moltin_autorization_data['expires'])
-    expires_in = int(moltin_autorization_data['expires_in'])
-    expire_in = expires_in + expires
-    expire_in = (
-        datetime.utcfromtimestamp(expire_in).strftime('%Y-%b-%d %H:%M:%S (UTC)')
-    )
-    logger.info('token expire on: {}'.format(expire_in))
-
     os.environ['MOLTIN_API_TOKEN'] = moltin_api_token
 
     return moltin_api_token
@@ -118,7 +110,7 @@ def add_product_to_cart(moltin_api_token, chat_id, product_id, quantity):
         'data': { 
             'id': product_id,
             'type': 'cart_item',
-            'quantity': quantity,
+            'quantity': int(quantity),
         }
     }
     response = requests.post(url, headers=headers, json=payload)
