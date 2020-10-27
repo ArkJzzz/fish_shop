@@ -33,8 +33,9 @@ def main():
             style='%',
         )
     console_handler.setFormatter(formatter)
-    logger.setLevel(logging.DEBUG)
+
     logger.addHandler(console_handler)
+    logger.setLevel(logging.DEBUG)
 
     cms_helpers_logger = logging.getLogger('cms_helpers')
     cms_helpers_logger.addHandler(console_handler)
@@ -45,17 +46,10 @@ def main():
     keyboards_logger.setLevel(logging.DEBUG)
 
     load_dotenv()
-    try:
-        updater = Updater(
-                token=os.getenv('DEV_TELEGRAM_TOKEN'),
-                use_context=True,
-            )
-    except ValueError:
-        updater = Updater(
-                token=os.getenv('PROD_TELEGRAM_TOKEN'), 
-                use_context=True,
-            )       
-
+    updater = Updater(
+            token=os.getenv('TELEGRAM_TOKEN'),
+            use_context=True,
+        )
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', handle_users_reply))
     dispatcher.add_handler(CallbackQueryHandler(handle_users_reply))
@@ -130,7 +124,6 @@ def handle_users_reply(update, context):
         next_state = state_handler(update, context)
         logger.debug('next_state: {}\n'.format(next_state))
         db.hset(name='fish_shop_users_states', key=chat_id, value=next_state)
-        
 
     except requests.exceptions.HTTPError as err:
         status_code = err.response.status_code
@@ -328,7 +321,7 @@ def checkout(update, context):
             )
         logger.info(buy_message)
         context.bot.send_message(
-            chat_id=os.getenv('ADMIN_CHAT_ID'),
+            chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
             text=buy_message
             )
 
