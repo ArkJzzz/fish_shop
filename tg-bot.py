@@ -5,6 +5,7 @@ import logging
 import redis
 import requests
 import json
+from datetime import datetime
 
 from telegram import InlineKeyboardMarkup
 from telegram.ext import Filters
@@ -22,7 +23,7 @@ import keyboards
 logger = logging.getLogger(__file__)
 
 _database = None
-
+_moltin_autorization_data = None
 
 
 def get_database_connection():
@@ -39,8 +40,24 @@ def get_database_connection():
     return _database
 
 
+def get_moltin_api_token():
+    global _moltin_autorization_data
+    if _moltin_autorization_data:
+        current_time = datetime.utcnow()
+        expires = int(_moltin_autorization_data['expires'])
+        expires = datetime.utcfromtimestamp(expires)
+        if current_time >= expires:
+            _moltin_autorization_data = cms_helpers.get_moltin_autorization()
+    else:
+        _moltin_autorization_data = cms_helpers.get_moltin_autorization()
+
+    return f'{_moltin_autorization_data["token_type"]} '\
+            f'{_moltin_autorization_data["access_token"]}'
+
+
 def handle_users_reply(update, context):
     db = get_database_connection()
+    moltin_api_token = get_moltin_api_token()
 
     if update.message:
         user_reply = update.message.text
@@ -89,15 +106,9 @@ def handle_users_reply(update, context):
         next_state = state_handler(update, context)
         logger.debug('next_state: {}\n'.format(next_state))
         db.hset(name='fish_shop_users_states', key=chat_id, value=next_state)
-
-    # except requests.exceptions.HTTPError as err:
-    #     status_code = err.response.status_code
-    #     logger.error('Error. Status code {}'.format(status_code))
-    #     if status_code == 403:
-    #         cms_helpers.get_moltin_api_token()
-
     except Exception as err:
         logger.error('Error: {}'.format(err), exc_info=True)
+
 
 def error(update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -107,8 +118,7 @@ def start(update, context):
     chat_id = update.message.chat_id
     user = update.message.from_user
     logger.info(f'User @{user.username} started the conversation.')
-    moltin_api_token = cms_helpers.get_moltin_api_token()
-    logger.debug(f'Moltin API token: {moltin_api_token}')
+    moltin_api_token = get_moltin_api_token()
     cart = cms_helpers.get_cart(moltin_api_token, chat_id)
     logger.debug(f'Корзина: {cart}')
 
@@ -126,7 +136,7 @@ def start(update, context):
 
 
 def show_menu(update, context):
-    moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
+    moltin_api_token = get_moltin_api_token()
     products = cms_helpers.get_products(moltin_api_token)
     query = update.callback_query
 
@@ -148,7 +158,7 @@ def show_menu(update, context):
 
 
 def show_description(update, context):
-    moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
+    moltin_api_token = get_moltin_api_token()
     query = update.callback_query
     chat_id = query.message.chat_id
 
@@ -196,7 +206,7 @@ def show_description(update, context):
 
 
 def show_cart(update, context):
-    moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
+    moltin_api_token = get_moltin_api_token()
     query = update.callback_query
     chat_id = query.message.chat_id
 
@@ -224,7 +234,7 @@ def show_cart(update, context):
 
 
 def checkout(update, context):
-    moltin_api_token = os.getenv('MOLTIN_API_TOKEN')
+    moltin_api_token = get_moltin_api_token()
     query = update.callback_query
     chat_id = query.message.chat_id
     customer_name = query.from_user.first_name

@@ -14,7 +14,7 @@ logger = logging.getLogger('cms_helpers')
 BASE_URL = 'https://api.moltin.com/v2'
 
 
-def get_moltin_api_token():
+def get_moltin_autorization():
     load_dotenv()
     moltin_client_id = os.getenv('ELASTICPATH_CLIENT_ID')
     url = 'https://api.moltin.com/oauth/access_token'
@@ -24,17 +24,9 @@ def get_moltin_api_token():
     }
     response = requests.post(url, data=data)
     response.raise_for_status()
+    logger.debug(response.json())
 
-    moltin_autorization_data = response.json()
-    logger.debug(moltin_autorization_data)
-
-    moltin_api_token = '{} {}'.format(
-            moltin_autorization_data['token_type'],
-            moltin_autorization_data['access_token'],
-        )
-    os.environ['MOLTIN_API_TOKEN'] = moltin_api_token
-
-    return moltin_api_token
+    return response.json()
 
 
 def get_products(moltin_api_token):
