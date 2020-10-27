@@ -2,7 +2,7 @@
 
 Чат-бот-магазин для Telegram.
 
-![](tg-fish-shop.gif)
+![](images/tg-fish-shop.gif)
 
 
 ## Что используется 
@@ -21,12 +21,12 @@
 
     Получите [ключи для доступа к API](https://dashboard.elasticpath.com/app).
 
-    ![](elasticpath_keys.png)
+    ![](images/elasticpath_keys.png)
 
 
     Создайте товары [в каталоге товаров](https://dashboard.elasticpath.com/app/catalogue/products)
 
-    ![](elasticpath_catalogue.png)
+    ![](images/elasticpath_catalogue.png)
 
 
 - **Telegram**
@@ -34,11 +34,11 @@
     Напишите [Отцу ботов](https://telegram.me/BotFather):
 
     ```
-    \start
+    /start
     ```
 
     ```
-    \newbot
+    /newbot
     ```
 
     Получите токен для доступа к API Telegram.
@@ -47,7 +47,7 @@
 
     Зарегистрируйтесь на [redislabs](https://redislabs.com/).
 
-    Получите адрес БД вида `redis-13965.f18.us-east-4-9.wc1.cloud.redislabs.com`, его порт вида: `16635` и его пароль.
+    Получите адрес БД вида `redis-13965.f18.us-east-4-9.wc1.cloud.redislabs.com`, порт вида: `16635` и пароль.
 
 
 ## Установка
