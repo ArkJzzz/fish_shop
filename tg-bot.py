@@ -5,6 +5,7 @@ import logging
 import redis
 import requests
 import json
+import textwrap
 from datetime import datetime
 
 from telegram import InlineKeyboardMarkup
@@ -122,9 +123,12 @@ def start(update, context):
     cart = cms_helpers.get_cart(moltin_api_token, chat_id)
     logger.debug(f'Корзина: {cart}')
 
-    welcome_message = f'Здравствуйте, {user.first_name}\n'\
-                    f'Рады видеть Вас в нашем магазине!\n'\
-                    f'Загляните в наше меню:'
+    welcome_message = f'''\
+            Здравствуйте, {user.first_name}.
+            Рады видеть Вас в нашем магазине!
+            Загляните в наше меню:
+        '''
+    welcome_message = textwrap.dedent(welcome_message)
     reply_keyboard = InlineKeyboardMarkup(keyboards.start_keyboard)
 
     update.message.reply_text(
@@ -272,9 +276,11 @@ def checkout(update, context):
 
             return 'WAITING_EMAIL'
 
-        buy_message = 'Совершена покупка:\n'\
-                    f'{customer["data"]}\n\n'\
-                    f'{keyboards.format_cart(cart_items)}\n'
+        buy_message = f'''Совершена покупка:
+                    {customer["data"]}
+
+                    {keyboards.format_cart(cart_items)}
+                    '''
         logger.info(buy_message)
         context.bot.send_message(
             chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
@@ -285,9 +291,12 @@ def checkout(update, context):
             message_id=query.message.message_id,
         )
 
-        create_customer_message = 'Спасибо за покупку!\n'\
-                'Мы с Вами свяжемся в ближайшее время '\
-                'для уточнения способа оплаты и доставки выбранных товаров'
+        create_customer_message = f'''\
+                Спасибо за покупку!
+                Мы с Вами свяжемся в ближайшее время \
+                для уточнения способа оплаты и доставки выбранных товаров
+            '''
+        create_customer_message = textwrap.dedent(create_customer_message)
         reply_keyboard = InlineKeyboardMarkup(keyboards.start_keyboard)
         query.message.reply_text(
             text=create_customer_message,
@@ -315,8 +324,11 @@ def confirm_email(update, context):
             reply_markup=reply_keyboard,
         )
     else:
-        invalid_email_message = 'Кажется, e-mail неправильный.\n'\
-                                'Попробуйте снова.'
+        invalid_email_message = '''\
+                Кажется, e-mail неправильный.
+                Попробуйте снова.
+            '''
+        invalid_email_message = textwrap.dedent(invalid_email_message)
         update.message.reply_text(
             text=invalid_email_message, 
         )

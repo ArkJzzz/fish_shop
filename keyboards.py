@@ -121,14 +121,15 @@ def get_confirmation_keyboard(email):
 def format_product_info(product_data):
     product_data = product_data['data']
     product_meta = product_data['meta']
-    product_name = product_data['name']
-    description = product_data['description']
     display_price = product_meta['display_price']['with_tax']['formatted']
-    availability = product_meta['stock']['level']
 
-    formated_info = f'{product_name}\n\n'\
-                    f'{display_price} за килограмм\n'\
-                    f'{description}'
+    formated_info = f'''\
+            {product_data['name']}
+            {product_data['description']}
+
+            {display_price} за килограмм
+        '''
+    formated_info = textwrap.dedent(formated_info)
 
     return formated_info
 
@@ -138,18 +139,17 @@ def format_cart(cart_items):
     cart_items_for_print = ''
     
     for item in cart_items['data']:
-        name = item['name']
-        description = item["description"]
-        quantity = item["quantity"]
         item_display_price = item['meta']['display_price']['with_tax']
-        price = item_display_price["unit"]["formatted"]
-        value = item_display_price["value"]["formatted"]
+        cart_item_to_print =  f'''\
+                {item['name']}
+                {item["description"]}
+                {item_display_price["unit"]["formatted"]} за килограмм
+                в корзине {item["quantity"]}кг
+                на сумму {item_display_price["value"]["formatted"]}
 
-        cart_items_for_print += f'{name}\n'\
-                                f'{description}\n'\
-                                f'{price} за килограмм\n'\
-                                f'в корзине {quantity}кг '\
-                                f'на сумму {value}\n\n'
+            '''
+        cart_item_to_print = textwrap.dedent(cart_item_to_print)    
+        cart_items_for_print += cart_item_to_print
 
     formated_cart = f'{cart_items_for_print}\n'\
                     f'Сумма заказа: {cart_price}'
