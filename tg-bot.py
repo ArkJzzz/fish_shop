@@ -143,20 +143,18 @@ def show_menu(update, context):
     moltin_api_token = get_moltin_api_token()
     products = cms_helpers.get_products(moltin_api_token)
     query = update.callback_query
+    logger.debug(query.data)
 
-    if 'HANDLE_MENU' in query.data:
-        reply_keyboard = keyboards.get_menu_keyboard(products['data'])
-        reply_keyboard = InlineKeyboardMarkup(reply_keyboard)
-        query.message.reply_text(
-            text='В нашем магазине Вы можете купить следующие товары:',
-            reply_markup=reply_keyboard,
-        )
-        context.bot.delete_message(
-            chat_id=query.message.chat_id,
-            message_id=query.message.message_id,
-        )
-    else: 
-        logger.debug(query.data)
+    reply_keyboard = keyboards.get_menu_keyboard(products['data'])
+    reply_keyboard = InlineKeyboardMarkup(reply_keyboard)
+    query.message.reply_text(
+        text='В нашем магазине Вы можете купить следующие товары:',
+        reply_markup=reply_keyboard,
+    )
+    context.bot.delete_message(
+        chat_id=query.message.chat_id,
+        message_id=query.message.message_id,
+    )
 
     return 'HANDLE_DESCRIPTION'
 
@@ -164,6 +162,7 @@ def show_menu(update, context):
 def show_description(update, context):
     moltin_api_token = get_moltin_api_token()
     query = update.callback_query
+    logger.debug(query.data)
     chat_id = query.message.chat_id
 
     if 'HANDLE_DESCRIPTION' in query.data:
@@ -202,15 +201,13 @@ def show_description(update, context):
             )
         logger.debug(f'Результат добавления товара в корзину: {adding_result}')
 
-    else: 
-        logger.debug(query.data)
-
     return 'HANDLE_DESCRIPTION'
 
 
 def show_cart(update, context):
     moltin_api_token = get_moltin_api_token()
     query = update.callback_query
+    logger.debug(query.data)
     chat_id = query.message.chat_id
 
     if 'HANDLE_REMOVE_ITEM' in query.data:
@@ -239,10 +236,9 @@ def show_cart(update, context):
 def checkout(update, context):
     moltin_api_token = get_moltin_api_token()
     query = update.callback_query
+    logger.debug(query.data)
     chat_id = query.message.chat_id
     customer_name = query.from_user.first_name
-
-
 
     if 'HANDLE_CHECKOUT' in query.data:
         waiting_email_message = 'Напишите, пожалуйста, Ваш e-mail адрес'
@@ -291,12 +287,9 @@ def checkout(update, context):
             message_id=query.message.message_id,
         )
 
-        create_customer_message = f'''\
-                Спасибо за покупку!
-                Мы с Вами свяжемся в ближайшее время \
-                для уточнения способа оплаты и доставки выбранных товаров
-            '''
-        create_customer_message = textwrap.dedent(create_customer_message)
+        create_customer_message = 'Спасибо за покупку!\n'\
+                'Мы с Вами свяжемся в ближайшее время '\
+                'для уточнения способа оплаты и доставки выбранных товаров'
         reply_keyboard = InlineKeyboardMarkup(keyboards.start_keyboard)
         query.message.reply_text(
             text=create_customer_message,
@@ -305,11 +298,7 @@ def checkout(update, context):
 
         return 'HANDLE_MENU'
 
-    else: 
-        logger.debug(query.data)
-
-
-        return 'WAITING_EMAIL'
+    return 'WAITING_EMAIL'
 
 
 def confirm_email(update, context):

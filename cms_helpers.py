@@ -155,21 +155,6 @@ def delete_cart(moltin_api_token, chat_id):
     return response
 
 
-def get_cart_items(moltin_api_token, chat_id):
-    url = '{base_url}/carts/{cart_id}/items'.format(
-            base_url=BASE_URL,
-            cart_id=chat_id,
-        )
-    headers = {
-        'Authorization': moltin_api_token,
-        'Content-Type': 'application/json',
-    }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-
-    return response.json()
-
-
 def remove_cart_item(moltin_api_token, chat_id, item_id):
     url = '{base_url}/carts/{cart_id}/items/{item_id}'.format(
             base_url=BASE_URL,

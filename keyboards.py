@@ -3,6 +3,7 @@ __author__ = 'ArkJzzz (arkjzzz@gmail.com)'
 
 import json
 import logging
+import textwrap
 
 from telegram import InlineKeyboardButton
 
@@ -57,7 +58,7 @@ def get_product_details_keyboard(product_id):
             ),
         )
     product_details_keyboard = [product_details_keyboard]
-    product_details_keyboard.append(            
+    product_details_keyboard.append(
         [
             InlineKeyboardButton(
                 text='В меню', 
@@ -148,7 +149,7 @@ def format_cart(cart_items):
                 на сумму {item_display_price["value"]["formatted"]}
 
             '''
-        cart_item_to_print = textwrap.dedent(cart_item_to_print)    
+        cart_item_to_print = textwrap.dedent(cart_item_to_print)
         cart_items_for_print += cart_item_to_print
 
     formated_cart = f'{cart_items_for_print}\n'\
