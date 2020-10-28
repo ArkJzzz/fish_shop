@@ -143,13 +143,13 @@ def show_menu(update, context):
     if 'HANDLE_MENU' in query.data:
         reply_keyboard = keyboards.get_menu_keyboard(products['data'])
         reply_keyboard = InlineKeyboardMarkup(reply_keyboard)
-        context.bot.delete_message(
-            chat_id=query.message.chat_id,
-            message_id=query.message.message_id,
-        )
         query.message.reply_text(
             text='В нашем магазине Вы можете купить следующие товары:',
             reply_markup=reply_keyboard,
+        )
+        context.bot.delete_message(
+            chat_id=query.message.chat_id,
+            message_id=query.message.message_id,
         )
     else: 
         logger.debug(query.data)
@@ -173,16 +173,15 @@ def show_description(update, context):
                 product_id,
             )
         reply_keyboard = InlineKeyboardMarkup(product_details_keyboard)
-
-        context.bot.delete_message(
-            chat_id=chat_id,
-            message_id=query.message.message_id,
-        )
         context.bot.send_photo(
             chat_id=chat_id,
             photo=image_link,
             caption=message,
             reply_markup=reply_keyboard,
+        )
+        context.bot.delete_message(
+            chat_id=chat_id,
+            message_id=query.message.message_id,
         )
 
     elif 'ADD_TO_CART' in query.data:
@@ -221,15 +220,15 @@ def show_cart(update, context):
     cart_show_keyboard = InlineKeyboardMarkup(cart_show_keyboard)
     logger.debug(f'Товары в корзине: {cart_items}')
 
-    context.bot.delete_message(
-        chat_id=chat_id,
-        message_id=query.message.message_id,
-    )
     query.message.reply_text(
         text=formated_cart_items,
         reply_markup=cart_show_keyboard,
     )
-    
+    context.bot.delete_message(
+        chat_id=chat_id,
+        message_id=query.message.message_id,
+    )
+
     return 'HANDLE_CART'
 
 
@@ -239,15 +238,16 @@ def checkout(update, context):
     chat_id = query.message.chat_id
     customer_name = query.from_user.first_name
 
-    context.bot.delete_message(
-        chat_id=query.message.chat_id,
-        message_id=query.message.message_id,
-    )
+
 
     if 'HANDLE_CHECKOUT' in query.data:
         waiting_email_message = 'Напишите, пожалуйста, Ваш e-mail адрес'
         query.message.reply_text(
             text=waiting_email_message,
+        )
+        context.bot.delete_message(
+            chat_id=query.message.chat_id,
+            message_id=query.message.message_id,
         )
 
         return 'WAITING_EMAIL'
@@ -280,6 +280,10 @@ def checkout(update, context):
             chat_id=os.getenv('TELEGRAM_ADMIN_CHAT_ID'),
             text=buy_message,
         )
+        context.bot.delete_message(
+            chat_id=query.message.chat_id,
+            message_id=query.message.message_id,
+        )
 
         create_customer_message = 'Спасибо за покупку!\n'\
                 'Мы с Вами свяжемся в ближайшее время '\
@@ -294,6 +298,7 @@ def checkout(update, context):
 
     else: 
         logger.debug(query.data)
+
 
         return 'WAITING_EMAIL'
 
