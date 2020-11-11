@@ -14,6 +14,7 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import MessageHandler
+from telegram_bot_pagination import InlineKeyboardPaginator
 from dotenv import load_dotenv
 from validate_email import validate_email
 
@@ -125,7 +126,7 @@ def start(update, context):
 
     welcome_message = f'''\
             Здравствуйте, {user.first_name}.
-            Рады видеть Вас в нашем магазине!
+            Рады видеть Вас в нашей пиццерии!
             Загляните в наше меню:
         '''
     welcome_message = textwrap.dedent(welcome_message)
@@ -145,8 +146,14 @@ def show_menu(update, context):
     query = update.callback_query
     logger.debug(query.data)
 
-    reply_keyboard = keyboards.get_menu_keyboard(products['data'])
-    reply_keyboard = InlineKeyboardMarkup(reply_keyboard)
+    if 'PAGE' in query.data:
+        user_reply, pattern, current_page = query.data.split('|')
+        current_page = int(current_page)
+    else:
+        current_page = 1
+
+    reply_keyboard = keyboards.get_menu_keyboard(products['data'], 
+                                                                current_page)
     query.message.reply_text(
         text='В нашем магазине Вы можете купить следующие товары:',
         reply_markup=reply_keyboard,
@@ -348,7 +355,7 @@ def main():
 
     load_dotenv()
     updater = Updater(
-            token=os.getenv('TELEGRAM_TOKEN'),
+            token=os.getenv('DEV_TELEGRAM_TOKEN'),
             use_context=True,
         )
     dispatcher = updater.dispatcher

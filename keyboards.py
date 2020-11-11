@@ -6,6 +6,7 @@ import logging
 import textwrap
 
 from telegram import InlineKeyboardButton
+from telegram_bot_pagination import InlineKeyboardPaginator
 
 logger = logging.getLogger('keyboards')
 
@@ -20,30 +21,39 @@ start_keyboard = [
 ]
 
 
-def get_menu_keyboard(products):
-    menu_keyboard = []
+def get_menu_keyboard(products, current_page, items_per_page=3):
+    pages = []
+    page = []
     for product in products:
-        product_name = product['name']
-        product_id = product['id']
-        menu_keyboard.append(
-            [
-                InlineKeyboardButton(
-                    text=product_name, 
-                    callback_data=f'HANDLE_DESCRIPTION|{product_id}',
-                )
-            ],
-        )
+        if len(page) == items_per_page:
+            pages.append(page)
+            page = []
+        else: 
+            page.append(product)
+    pages.append(page)
 
-    menu_keyboard.append(
-        [
-            InlineKeyboardButton(
-                text='🛒 корзина', 
-                callback_data='HANDLE_CART'
-            ),
-        ],
+    paginator = InlineKeyboardPaginator(
+        len(pages),
+        current_page=current_page,
+        data_pattern='HANDLE_MENU|PAGE|{page}'
     )
 
-    return menu_keyboard
+    paginator.add_after(
+        InlineKeyboardButton(
+            text='🛒 корзина', 
+            callback_data='HANDLE_CART'
+        )
+    )
+
+    for product in pages[current_page - 1]:
+        paginator.add_before(
+            InlineKeyboardButton(
+                text=product['name'], 
+                callback_data=f'HANDLE_DESCRIPTION|{product["id"]}',
+            )
+        )
+
+    return paginator.markup
 
 
 def get_product_details_keyboard(product_id):
